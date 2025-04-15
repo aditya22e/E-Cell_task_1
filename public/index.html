@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricses</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>CRICSES, your live cricket score app</h1>
+        <div id="matches"></div>
+    </div>
+
+    <script>
+        async function loadMatches() {
+    try {
+        const response = await fetch('/api/cricket/matches');
+        const data = await response.json();
+        console.log('Matches Response:', data);
+        if (data.matches && data.matches.length > 0) {
+            const matchesDiv = document.getElementById('matches');
+            matchesDiv.innerHTML = '';
+            data.matches.forEach(match => {
+                const matchCard = document.createElement('div');
+                matchCard.className = 'match-card';
+                matchCard.innerHTML = `
+                    <h3>${match['team-1']} vs ${match['team-2']}</h3>
+                    <p>Match Type: ${match.type}</p>
+                    <p>Date: ${new Date(match.dateTimeGMT).toLocaleString()}</p>
+                    <p id="score-${match.unique_id}">Loading score...</p>
+                    <button onclick="loadScore('${match.unique_id}')">Refresh Score</button>
+                `;
+                matchesDiv.appendChild(matchCard);
+                loadScore(match.unique_id);
+            });
+        } else {
+            document.getElementById('matches').innerHTML = '<p>No matches available at the moment.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading matches:', error);
+        document.getElementById('matches').innerHTML = '<p>Error loading matches. Please try again later.</p>';
+    }
+}
+
+        async function loadScore(uniqueId) {
+            try {
+                const response = await fetch(`/api/cricket/score/${uniqueId}`);
+                const data = await response.json();
+                const scoreElement = document.getElementById(`score-${uniqueId}`);
+                scoreElement.textContent = data.score || 'No score available';
+            } catch (error) {
+                console.error('Error loading score:', error);
+            }
+        }
+
+        // load matches when page loads
+        window.onload = loadMatches;
+
+        // auto-refresh scores every 30 seconds
+        setInterval(loadMatches, 30000);
+    </script>
+</body>
+</html>
