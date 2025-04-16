@@ -8,7 +8,7 @@ const CRICAPI_BASE_URL = 'https://api.cricapi.com/v1';
 // Get list of matches
 router.get('/matches', async (req, res) => {
   try {
-    const response = await axios.get(`${CRICAPI_BASE_URL}/countries?apikey=${CRICAPI_KEY}&offset=` + offset);
+    const response = await axios.get(`${CRICAPI_BASE_URL}/matches?apikey=${CRICAPI_KEY}&offset=` + offset);
     res.json(response.data);
   } catch (error) {
     console.error('Error fetching matches:', error.message);
